@@ -1,41 +1,14 @@
-const setupDiv = document.getElementById("setup");
-const appDiv = document.getElementById("app");
 const loadBtn = document.getElementById("loadBtn");
 const statusTxt = document.getElementById("status");
-
-const video = document.getElementById("video");
 const listDiv = document.getElementById("channelList");
-const nameDiv = document.getElementById("channelName");
+const searchInput = document.getElementById("search");
 
-let channels = [];
-let currentIndex = 0;
-let hls;
+let channelNames = [];
 
-// INIT
-window.addEventListener("load", () => {
-  console.log("App started");
-
-  const savedPlaylist = localStorage.getItem("playlist");
-  const lastChannel = localStorage.getItem("lastChannel");
-
-  if (savedPlaylist) {
-    showApp();
-    parseM3U(savedPlaylist);
-
-    if (lastChannel) {
-      playChannel(parseInt(lastChannel));
-    }
-  }
-});
-
-// BUTTON CLICK
-loadBtn.addEventListener("click", () => {
-  const url = document.getElementById("playlistUrl").value.trim();
-
-  if (!url) {
-    statusTxt.innerText = "Isi URL dulu";
-    return;
-  }
+// LOAD PLAYLIST
+loadBtn.onclick = () => {
+  const url = document.getElementById("m3uUrl").value.trim();
+  if (!url) return statusTxt.innerText = "Paste URL dulu";
 
   statusTxt.innerText = "Loading playlist...";
 
@@ -45,96 +18,69 @@ loadBtn.addEventListener("click", () => {
       return res.text();
     })
     .then(text => {
-      localStorage.setItem("playlist", text);
-      showApp();
       parseM3U(text);
-      statusTxt.innerText = "";
+      statusTxt.innerText = `Loaded ${channelNames.length} channels`;
     })
     .catch(err => {
       console.error(err);
-      statusTxt.innerText = "Gagal load playlist (CORS / URL)";
+      statusTxt.innerText = "Gagal load (CORS / URL invalid)";
     });
-});
-
-// SHOW PLAYER
-function showApp() {
-  setupDiv.classList.add("hidden");
-  appDiv.classList.remove("hidden");
-}
+};
 
 // PARSE M3U
 function parseM3U(data) {
-  channels = [];
+  channelNames = [];
   const lines = data.split("\n");
 
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith("#EXTINF")) {
       const name = lines[i].split(",")[1]?.trim();
-      const url = lines[i + 1]?.trim();
-
-      if (name && url && url.startsWith("http")) {
-        channels.push({ name, url });
-      }
+      if (name) channelNames.push(name);
     }
   }
 
-  console.log("Channels:", channels.length);
-
-  renderChannels();
-  playChannel(0);
+  renderList(channelNames);
 }
 
-// RENDER CHANNELS
-function renderChannels() {
+// RENDER LIST
+function renderList(list) {
   listDiv.innerHTML = "";
 
-  channels.forEach((ch, i) => {
+  list.forEach(name => {
     const div = document.createElement("div");
     div.className = "channel";
-    div.innerText = `${i+1}. ${ch.name}`;
-    div.onclick = () => playChannel(i);
+    div.innerText = name;
     listDiv.appendChild(div);
   });
 }
 
-// PLAY CHANNEL
-function playChannel(index) {
-  if (!channels[index]) return;
+// SEARCH FILTER
+searchInput.oninput = () => {
+  const keyword = searchInput.value.toLowerCase();
+  const filtered = channelNames.filter(ch =>
+    ch.toLowerCase().includes(keyword)
+  );
+  renderList(filtered);
+};
 
-  currentIndex = index;
-  localStorage.setItem("lastChannel", index);
+// COPY ALL
+function copyNames() {
+  if (!channelNames.length) return;
 
-  document.querySelectorAll(".channel").forEach(el => el.classList.remove("active"));
-  document.querySelectorAll(".channel")[index]?.classList.add("active");
+  const text = channelNames.join("\n");
+  navigator.clipboard.writeText(text);
 
-  const src = channels[index].url;
-  nameDiv.innerText = channels[index].name;
-
-  if (hls) hls.destroy();
-
-  if (window.Hls && Hls.isSupported()) {
-    hls = new Hls();
-    hls.loadSource(src);
-    hls.attachMedia(video);
-  } else {
-    video.src = src;
-  }
+  statusTxt.innerText = "Semua nama channel dicopy ✔";
 }
 
-// REMOTE / KEYBOARD
-document.addEventListener("keydown", (e) => {
+// EXPORT TXT
+function exportTXT() {
+  if (!channelNames.length) return;
 
-  if (e.key >= "1" && e.key <= "9") {
-    const num = parseInt(e.key) - 1;
-    playChannel(num);
-  }
+  const blob = new Blob([channelNames.join("\n")], { type: "text/plain" });
+  const a = document.createElement("a");
 
-  if (e.key === "ArrowUp") {
-    if (currentIndex > 0) playChannel(currentIndex - 1);
-  }
-
-  if (e.key === "ArrowDown") {
-    if (currentIndex < channels.length - 1) playChannel(currentIndex + 1);
-  }
-
-});
+  a.href = URL.createObjectURL(blob);
+  a.download = "channels.txt";
+  a.click();
+}
