@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>M3U Glass Extractor</title>
+  <title>M3U Playlist Extractor</title>
 
-  <!-- Montserrat Font -->
+  <!-- Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
@@ -14,27 +14,46 @@
 <div class="bg"></div>
 
 <header>
-  <h1>M3U Glass Extractor</h1>
+  <h1>M3U PLAYLIST EXTRACTOR</h1>
   <button id="modeToggle">🌙 / ☀️</button>
 </header>
 
-<div class="container glass">
+<main id="mainBox" class="centered">
 
-  <div class="inputBox">
-    <input id="m3uUrl" placeholder="Paste playlist URL (.m3u)">
-    <button id="loadBtn">LOAD</button>
+  <div class="container glass">
+
+    <div class="inputBox">
+      <div class="inputWrap">
+        <span>🔗</span>
+        <input id="m3uUrl" placeholder="Paste playlist URL (.m3u)">
+      </div>
+      <button id="loadBtn">LOAD</button>
+    </div>
+
+    <div class="tools">
+      <div class="inputWrap">
+        <span>🔍</span>
+        <input id="search" placeholder="Search channel...">
+      </div>
+      <button id="copyBtn">COPY</button>
+      <button id="exportBtn">EXPORT TXT</button>
+    </div>
+
+    <div id="status"></div>
+
+    <div id="categories"></div>
+    <div id="channelList"></div>
+
   </div>
 
-  <div class="tools">
-    <input id="search" placeholder="Search channel...">
-    <button id="copyBtn">COPY</button>
-    <button id="exportBtn">EXPORT TXT</button>
+</main>
+
+<!-- Player -->
+<div id="playerModal">
+  <div class="playerBox">
+    <div class="closeBtn" onclick="closePlayer()">✕ Close</div>
+    <video id="videoPlayer" controls autoplay></video>
   </div>
-
-  <div id="status"></div>
-  <div id="categories"></div>
-  <div id="channelList"></div>
-
 </div>
 
 <!-- Spinner -->
@@ -42,18 +61,10 @@
   <div class="spinner"></div>
 </div>
 
-<!-- Player Modal -->
-<div id="playerModal">
-  <div class="playerBox">
-    <div class="closeBtn" onclick="closePlayer()">✕ Close</div>
-    <video id="videoPlayer" controls autoplay></video>
-  </div>
-</div>
-  
 <!-- Marquee -->
 <div id="marquee">
   <div class="marquee-content">
-    This tool extracts channel names, logos, and categories from M3U playlists • Glass UI • Smart filtering • TXT export
+    Extract channel names, logos & categories from M3U playlists • Elegant Glass UI • Smooth Filtering • IPTV Utility Tool
   </div>
 </div>
 
