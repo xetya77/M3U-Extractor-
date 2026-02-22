@@ -10,11 +10,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const loading = document.getElementById("loading");
   const modeToggle = document.getElementById("modeToggle");
 
+  const modal = document.getElementById("playerModal");
+  const video = document.getElementById("videoPlayer");
+
   let channels = [];
   let categories = {};
   let activeCategory = "ALL";
 
-  showLoading(false); // HARD FIX spinner
+  showLoading(false);
 
   loadBtn.addEventListener("click", () => {
 
@@ -28,17 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
     showLoading(true);
 
     fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return res.text();
-      })
+      .then(res => res.text())
       .then(text => {
         parseM3U(text);
         statusTxt.innerText = `Loaded ${channels.length} channels`;
         showLoading(false);
       })
-      .catch(err => {
-        console.error(err);
+      .catch(() => {
         statusTxt.innerText = "Failed to load playlist";
         showLoading(false);
       });
@@ -65,9 +64,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const logo = logoMatch ? logoMatch[1] : "";
         const group = groupMatch ? groupMatch[1] : "Uncategorized";
 
-        if (name) {
+        const streamUrl = lines[i + 1]?.trim();
 
-          const ch = { name, logo, group };
+        if (name && streamUrl) {
+
+          const ch = { name, logo, group, streamUrl };
           channels.push(ch);
 
           if (!categories[group]) categories[group] = [];
@@ -83,7 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderCategories() {
     catDiv.innerHTML = "";
-
     createCategoryButton("ALL");
 
     Object.keys(categories).forEach(cat => {
@@ -92,15 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createCategoryButton(name) {
-
     const div = document.createElement("div");
     div.className = "category";
     div.innerText = name;
 
-    div.addEventListener("click", () => {
+    div.onclick = () => {
       activeCategory = name;
       renderChannels(name === "ALL" ? channels : categories[name]);
-    });
+    };
 
     catDiv.appendChild(div);
   }
@@ -109,10 +108,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     listDiv.innerHTML = "";
 
-    list.forEach(ch => {
+    list.forEach((ch, i) => {
 
       const div = document.createElement("div");
       div.className = "channel";
+      div.style.animationDelay = `${i * 0.03}s`;
 
       div.innerHTML = `
         <img src="${ch.logo}" onerror="this.style.display='none'">
@@ -122,9 +122,22 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
+      div.onclick = () => playStream(ch.streamUrl);
+
       listDiv.appendChild(div);
     });
   }
+
+  function playStream(url) {
+    modal.style.display = "flex";
+    video.src = url;
+  }
+
+  window.closePlayer = () => {
+    modal.style.display = "none";
+    video.pause();
+    video.src = "";
+  };
 
   searchInput.addEventListener("input", () => {
 
@@ -141,14 +154,14 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChannels(filtered);
   });
 
-  copyBtn.addEventListener("click", () => {
+  copyBtn.onclick = () => {
     navigator.clipboard.writeText(channels.map(c => c.name).join("\n"));
     statusTxt.innerText = "Copied ✔";
-  });
+  };
 
-  exportBtn.addEventListener("click", () => {
+  exportBtn.onclick = () => {
     downloadTXT("channels.txt", channels.map(c => c.name));
-  });
+  };
 
   function downloadTXT(filename, data) {
     const blob = new Blob([data.join("\n")], { type: "text/plain" });
@@ -162,8 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loading.style.display = show ? "flex" : "none";
   }
 
-  modeToggle.addEventListener("click", () => {
+  modeToggle.onclick = () => {
     document.body.classList.toggle("light");
-  });
+  };
 
 });
