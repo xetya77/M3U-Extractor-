@@ -2,8 +2,9 @@ const loadBtn = document.getElementById("loadBtn");
 const statusTxt = document.getElementById("status");
 const listDiv = document.getElementById("channelList");
 const searchInput = document.getElementById("search");
+const modeToggle = document.getElementById("modeToggle");
 
-let channelNames = [];
+let channels = [];
 
 // LOAD PLAYLIST
 loadBtn.onclick = () => {
@@ -13,74 +14,93 @@ loadBtn.onclick = () => {
   statusTxt.innerText = "Loading playlist...";
 
   fetch(url)
-    .then(res => {
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return res.text();
-    })
+    .then(res => res.text())
     .then(text => {
       parseM3U(text);
-      statusTxt.innerText = `Loaded ${channelNames.length} channels`;
+      statusTxt.innerText = `Loaded ${channels.length} channels`;
     })
-    .catch(err => {
-      console.error(err);
-      statusTxt.innerText = "Gagal load (CORS / URL invalid)";
-    });
+    .catch(() => statusTxt.innerText = "Gagal load playlist");
 };
 
-// PARSE M3U
+// PARSE M3U + LOGO
 function parseM3U(data) {
-  channelNames = [];
+  channels = [];
   const lines = data.split("\n");
 
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith("#EXTINF")) {
-      const name = lines[i].split(",")[1]?.trim();
-      if (name) channelNames.push(name);
+
+      const line = lines[i];
+
+      const name = line.split(",")[1]?.trim();
+
+      const logoMatch = line.match(/tvg-logo="(.*?)"/);
+      const logo = logoMatch ? logoMatch[1] : "";
+
+      if (name) channels.push({ name, logo });
     }
   }
 
-  renderList(channelNames);
+  renderList(channels);
 }
 
-// RENDER LIST
+// RENDER
 function renderList(list) {
   listDiv.innerHTML = "";
 
-  list.forEach(name => {
+  list.forEach(ch => {
     const div = document.createElement("div");
     div.className = "channel";
-    div.innerText = name;
+
+    div.innerHTML = `
+      <img src="${ch.logo || ''}" onerror="this.style.display='none'">
+      <span>${ch.name}</span>
+    `;
+
     listDiv.appendChild(div);
   });
 }
 
-// SEARCH FILTER
+// SEARCH
 searchInput.oninput = () => {
   const keyword = searchInput.value.toLowerCase();
-  const filtered = channelNames.filter(ch =>
-    ch.toLowerCase().includes(keyword)
+  const filtered = channels.filter(ch =>
+    ch.name.toLowerCase().includes(keyword)
   );
   renderList(filtered);
 };
 
 // COPY ALL
 function copyNames() {
-  if (!channelNames.length) return;
-
-  const text = channelNames.join("\n");
+  const text = channels.map(ch => ch.name).join("\n");
   navigator.clipboard.writeText(text);
-
-  statusTxt.innerText = "Semua nama channel dicopy ✔";
+  statusTxt.innerText = "Nama channel dicopy ✔";
 }
 
 // EXPORT TXT
 function exportTXT() {
-  if (!channelNames.length) return;
-
-  const blob = new Blob([channelNames.join("\n")], { type: "text/plain" });
+  const blob = new Blob([channels.map(ch => ch.name).join("\n")], { type: "text/plain" });
   const a = document.createElement("a");
-
   a.href = URL.createObjectURL(blob);
   a.download = "channels.txt";
   a.click();
 }
+
+// DOWNLOAD LOGOS
+function downloadLogos() {
+  channels.forEach(ch => {
+    if (!ch.logo) return;
+
+    const a = document.createElement("a");
+    a.href = ch.logo;
+    a.download = ch.name + ".png";
+    a.click();
+  });
+
+  statusTxt.innerText = "Download logo dimulai 🚀";
+}
+
+// MODE TOGGLE
+modeToggle.onclick = () => {
+  document.body.classList.toggle("light");
+};
