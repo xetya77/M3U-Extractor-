@@ -11,16 +11,15 @@
 <div id="setup">
   <div class="card">
     <h2>Add Playlist</h2>
-    <input id="playlistUrl" placeholder="https://example.com/playlist.m3u">
-    <button onclick="loadPlaylist()">LOAD</button>
+    <input id="playlistUrl" type="text" placeholder="https://example.com/playlist.m3u">
+    <button id="loadBtn">LOAD</button>
+    <p id="status"></p>
   </div>
 </div>
 
 <div id="app" class="hidden">
-  <video id="video" autoplay controls></video>
-  <div id="overlay">
-    <div id="channelName">Loading...</div>
-  </div>
+  <video id="video" controls autoplay></video>
+  <div id="channelName"></div>
   <div id="channelList"></div>
 </div>
 
