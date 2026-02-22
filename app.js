@@ -20,11 +20,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* CLOCK realtime smooth */
   function updateClock() {
-    const now = new Date();
-    clock.innerText = now.toLocaleTimeString();
-  }
-  setInterval(updateClock, 1000);
-  updateClock();
+  const now = new Date();
+
+  const h = String(now.getHours()).padStart(2, "0");
+  const m = String(now.getMinutes()).padStart(2, "0");
+  const s = String(now.getSeconds()).padStart(2, "0");
+
+  clock.innerText = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
 
   /* Restore theme */
   if (localStorage.getItem("theme") === "light") {
