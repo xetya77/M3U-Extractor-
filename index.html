@@ -2,20 +2,25 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Simple IPTV</title>
+  <title>My IPTV</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
 
 <div id="setup">
-  <h2>Add Playlist</h2>
-  <input id="playlistUrl" placeholder="https://example.com/playlist.m3u">
-  <button onclick="loadPlaylist()">LOAD</button>
+  <div class="card">
+    <h2>Add Playlist</h2>
+    <input id="playlistUrl" placeholder="https://example.com/playlist.m3u">
+    <button onclick="loadPlaylist()">LOAD</button>
+  </div>
 </div>
 
-<div id="playerUI" class="hidden">
-  <video id="video" controls autoplay></video>
+<div id="app" class="hidden">
+  <video id="video" autoplay controls></video>
+  <div id="overlay">
+    <div id="channelName">Loading...</div>
+  </div>
   <div id="channelList"></div>
 </div>
 
