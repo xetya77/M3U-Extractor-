@@ -5,43 +5,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-video {
-  width: 100%;
-  height: 65vh;
-  background: black;
-}
-
-#overlay {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(0,0,0,0.6);
-  padding: 8px 14px;
-  border-radius: 8px;
-}
-
-#channelName {
-  font-size: 18px;
-}
-
-#channelList {
-  padding: 10px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-}
-
-.channel {
-  padding: 10px;
-  background: #111;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.channel.active {
-  background: #333;
-  outline: 2px solid #00e5ff;
-}
+.hidden { display: none; }
 
 #setup {
   display: flex;
@@ -58,7 +22,7 @@ video {
 }
 
 input {
-  width: 260px;
+  width: 280px;
   padding: 10px;
   margin: 10px 0;
   background: black;
@@ -68,11 +32,37 @@ input {
 
 button {
   padding: 10px 18px;
-  background: #00e5ff;
+  background: cyan;
   border: none;
   cursor: pointer;
 }
 
-.hidden {
-  display: none;
+video {
+  width: 100%;
+  height: 60vh;
+  background: black;
+}
+
+#channelName {
+  padding: 10px;
+  font-size: 18px;
+  background: #111;
+}
+
+#channelList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  padding: 10px;
+}
+
+.channel {
+  background: #111;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.channel.active {
+  background: #333;
+  outline: 2px solid cyan;
 }
