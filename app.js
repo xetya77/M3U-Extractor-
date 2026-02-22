@@ -9,9 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const hamburger = document.getElementById("hamburger");
   const sideMenu = document.getElementById("sideMenu");
+  const closeSide = document.getElementById("closeSide");
   const sideCategories = document.getElementById("sideCategories");
 
-  const closeSide = document.getElementById("closeSide");
   const statusTxt = document.getElementById("status");
   const listDiv = document.getElementById("channelList");
   const searchRow = document.getElementById("searchRow");
@@ -22,18 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("playerModal");
   const video = document.getElementById("videoPlayer");
 
+  const numberOverlay = document.getElementById("numberOverlay");
+
   let channels = [];
   let categories = {};
   let activeList = [];
   let numberBuffer = "";
   let numberTimeout;
 
-if (closeSide) {
-  closeSide.onclick = () => {
-    sideMenu.classList.remove("show");
-  };
-}
-  
   /* ================= CLOCK 24 JAM ================= */
   function updateClock() {
     const now = new Date();
@@ -62,14 +58,22 @@ if (closeSide) {
     loading.style.display = show ? "flex" : "none";
   }
 
-  /* ================= HAMBURGER MENU ================= */
-  if (hamburger && sideMenu) {
+  /* ================= SIDEBAR ================= */
+  if (hamburger) {
     hamburger.onclick = () => {
       sideMenu.classList.toggle("show");
+      document.body.classList.toggle("menu-open");
     };
   }
 
-  /* ================= LOAD PLAYLIST ================= */
+  if (closeSide) {
+    closeSide.onclick = () => {
+      sideMenu.classList.remove("show");
+      document.body.classList.remove("menu-open");
+    };
+  }
+
+  /* ================= LOAD ================= */
   if (loadBtn) {
     loadBtn.onclick = () => {
 
@@ -82,6 +86,7 @@ if (closeSide) {
       fetch(url)
         .then(r => r.text())
         .then(text => {
+
           localStorage.setItem("playlistData", text);
           parseM3U(text);
 
@@ -97,7 +102,7 @@ if (closeSide) {
     };
   }
 
-  /* ================= PARSE M3U ================= */
+  /* ================= PARSE ================= */
   function parseM3U(data) {
 
     channels = [];
@@ -134,7 +139,7 @@ if (closeSide) {
     renderChannels(activeList);
   }
 
-  /* ================= RENDER CATEGORIES → SIDEBAR ================= */
+  /* ================= CATEGORIES ================= */
   function renderCategories() {
 
     if (!sideCategories) return;
@@ -150,17 +155,15 @@ if (closeSide) {
       div.onclick = () => {
         activeList = categories[cat];
         renderChannels(activeList);
-        sideMenu.classList.remove("show");
+        closeSide.click();
       };
 
       sideCategories.appendChild(div);
     });
   }
 
-  /* ================= RENDER CHANNELS ================= */
+  /* ================= CHANNELS ================= */
   function renderChannels(list) {
-
-    if (!listDiv) return;
 
     listDiv.innerHTML = "";
 
@@ -168,7 +171,7 @@ if (closeSide) {
 
       const div = document.createElement("div");
       div.className = "channel";
-      div.style.animationDelay = `${i * 0.02}s`;
+      div.style.animationDelay = `${i * 0.015}s`;
 
       div.innerHTML = `
         <img src="${ch.logo}" onerror="this.style.display='none'">
@@ -204,7 +207,9 @@ if (closeSide) {
 
     } else if (url.endsWith(".mpd")) {
 
-      dashjs.MediaPlayer().create().initialize(video, url, true);
+      if (window.dashjs) {
+        dashjs.MediaPlayer().create().initialize(video, url, true);
+      }
 
     } else {
       video.src = url;
@@ -222,18 +227,16 @@ if (closeSide) {
       modal.classList.remove("show", "closing");
       video.pause();
       video.src = "";
-      statusTxt.innerText = "";
     }, 350);
   }
 
   if (closeBtn) closeBtn.onclick = closePlayer;
 
-  /* ================= THEME TOGGLE ================= */
+  /* ================= THEME ================= */
   if (modeToggle) {
     modeToggle.onclick = () => {
 
       document.body.classList.toggle("light");
-
       const isLight = document.body.classList.contains("light");
 
       modeToggle.innerText = isLight ? "☀️" : "🌙";
@@ -249,7 +252,7 @@ if (closeSide) {
     };
   }
 
-  /* ================= EXPORT TXT ================= */
+  /* ================= EXPORT ================= */
   if (exportBtn) {
     exportBtn.onclick = () => {
 
@@ -262,7 +265,7 @@ if (closeSide) {
 
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = "all_channels.txt";
+      a.download = "channels.txt";
       a.click();
     };
   }
@@ -270,7 +273,6 @@ if (closeSide) {
   /* ================= COPY ================= */
   if (copyBtn) {
     copyBtn.onclick = () => {
-      if (!channels.length) return;
       navigator.clipboard.writeText(channels.map(c => c.name).join("\n"));
       statusTxt.innerText = "Copied ✔";
     };
@@ -287,31 +289,30 @@ if (closeSide) {
   }
 
   /* =====================================================
-     🔥 REMOTE / KEYBOARD ANGKA → SWITCH CHANNEL
+     🔥 REMOTE ANGKA + OVERLAY ANIMASI
      ===================================================== */
   document.addEventListener("keydown", (e) => {
 
     if (e.key >= "0" && e.key <= "9") {
 
       numberBuffer += e.key;
-      statusTxt.innerText = "Channel: " + numberBuffer;
+
+      numberOverlay.innerText = numberBuffer;
+      numberOverlay.classList.add("show");
 
       clearTimeout(numberTimeout);
 
       numberTimeout = setTimeout(() => {
 
         const num = parseInt(numberBuffer);
-
         const found = channels.find(c => c.number === num);
 
-        if (found) {
-          playStream(found);
-        }
+        if (found) playStream(found);
 
         numberBuffer = "";
-        statusTxt.innerText = "";
+        numberOverlay.classList.remove("show");
 
-      }, 700);
+      }, 800);
     }
 
   });
