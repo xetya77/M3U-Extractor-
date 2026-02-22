@@ -8,13 +8,14 @@
 </head>
 <body>
 
-<div id="player-screen">
-  <video id="video" autoplay controls></video>
+<div id="setup">
+  <h2>Add Playlist</h2>
+  <input id="playlistUrl" placeholder="https://example.com/playlist.m3u">
+  <button onclick="loadPlaylist()">LOAD</button>
 </div>
 
-<div id="ui">
-  <input id="playlistUrl" placeholder="Paste M3U URL">
-  <button id="loadBtn">Load</button>
+<div id="playerUI" class="hidden">
+  <video id="video" controls autoplay></video>
   <div id="channelList"></div>
 </div>
 
