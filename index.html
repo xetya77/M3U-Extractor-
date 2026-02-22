@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 
-  <!-- HLS + DASH -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/dashjs@latest/dist/dash.all.min.js"></script>
 </head>
@@ -17,7 +16,12 @@
 
 <header>
   <h1>M3U PLAYLIST EXTRACTOR</h1>
-  <button id="modeToggle">🌙 / ☀️</button>
+
+  <div class="headerRight">
+    <div id="clock"></div>
+    <button id="modeToggle">🌙</button>
+    <button id="resetBtn">RESET</button>
+  </div>
 </header>
 
 <main id="mainBox" class="centered">
@@ -32,7 +36,8 @@
       <button id="loadBtn">LOAD</button>
     </div>
 
-    <div class="toolsRow">
+    <!-- SEARCH (hidden awal) -->
+    <div id="searchRow" class="toolsRow hidden">
       <div class="inputWrap">
         <span>🔍</span>
         <input id="search" placeholder="Search channel...">
@@ -51,6 +56,8 @@
 
 <!-- PLAYER -->
 <div id="playerModal">
+  <div class="playerBackdrop"></div>
+
   <div class="playerBox">
     <div class="closeBtn" onclick="closePlayer()">✕ Close</div>
     <video id="videoPlayer" controls autoplay></video>
@@ -65,7 +72,7 @@
 <!-- MARQUEE -->
 <div id="marquee">
   <div class="marquee-content">
-    Extract channel names, logos & categories from M3U playlists • Remote Control Ready • HLS & DASH Support
+    Extract channels, logos & categories from M3U playlists • Smooth Glass UI • Remote Ready • HLS & DASH Support
   </div>
 </div>
 
