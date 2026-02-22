@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetBtn = document.getElementById("resetBtn");
   const exportBtn = document.getElementById("exportBtn");
   const copyBtn = document.getElementById("copyBtn");
+  const closeBtn = document.getElementById("closeBtn");
 
   const statusTxt = document.getElementById("status");
   const listDiv = document.getElementById("channelList");
@@ -20,18 +21,16 @@ document.addEventListener("DOMContentLoaded", () => {
   let channels = [];
   let categories = {};
   let activeList = [];
+  let currentChannelIndex = null;
 
   /* ================= CLOCK 24 JAM ================= */
   function updateClock() {
     const now = new Date();
-
     const h = String(now.getHours()).padStart(2, "0");
     const m = String(now.getMinutes()).padStart(2, "0");
     const s = String(now.getSeconds()).padStart(2, "0");
-
     clock.innerText = `${h}:${m}:${s}`;
   }
-
   setInterval(updateClock, 1000);
   updateClock();
 
@@ -123,7 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const div = document.createElement("div");
       div.className = "category";
       div.innerText = cat;
-      div.style.animationDelay = `${i * 0.03}s`;
 
       div.onclick = () => {
         activeList = categories[cat];
@@ -153,17 +151,21 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      div.onclick = () => playStream(ch.streamUrl);
+      div.onclick = () => playStream(ch, i);
 
       listDiv.appendChild(div);
     });
   }
 
   /* ================= PLAYER ================= */
-  function playStream(url) {
+  function playStream(channelObj, index) {
+
+    currentChannelIndex = index;
 
     modal.classList.remove("closing");
     modal.classList.add("show");
+
+    const url = channelObj.streamUrl;
 
     if (url.endsWith(".m3u8")) {
 
@@ -184,8 +186,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* ================= CLOSE PLAYER PREMIUM ================= */
-  window.closePlayer = () => {
+  /* ================= CLOSE PLAYER ================= */
+  function closePlayer() {
 
     modal.classList.add("closing");
 
@@ -193,8 +195,11 @@ document.addEventListener("DOMContentLoaded", () => {
       modal.classList.remove("show", "closing");
       video.pause();
       video.src = "";
+      currentChannelIndex = null;
     }, 350);
-  };
+  }
+
+  if (closeBtn) closeBtn.onclick = closePlayer;
 
   /* ================= THEME TOGGLE ================= */
   modeToggle.onclick = () => {
@@ -213,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     location.reload();
   };
 
-  /* ================= EXPORT TXT FIX ================= */
+  /* ================= EXPORT TXT ================= */
   exportBtn.onclick = () => {
 
     if (!channels.length) return;
@@ -243,5 +248,39 @@ document.addEventListener("DOMContentLoaded", () => {
       activeList.filter(c => c.name.toLowerCase().includes(key))
     );
   };
+
+  /* =====================================================
+     🔥 REMOTE / KEYBOARD NUMBER CHANNEL SWITCH
+     ===================================================== */
+
+  let numberBuffer = "";
+  let numberTimeout;
+
+  document.addEventListener("keydown", (e) => {
+
+    if (e.key >= "0" && e.key <= "9") {
+
+      numberBuffer += e.key;
+      statusTxt.innerText = "Channel: " + numberBuffer;
+
+      clearTimeout(numberTimeout);
+
+      numberTimeout = setTimeout(() => {
+
+        const channelNumber = parseInt(numberBuffer);
+
+        const found = channels.find(c => c.number === channelNumber);
+
+        if (found) {
+          playStream(found, found.number - 1);
+        }
+
+        numberBuffer = "";
+        statusTxt.innerText = "";
+
+      }, 700); // delay natural IPTV zap
+    }
+
+  });
 
 });
