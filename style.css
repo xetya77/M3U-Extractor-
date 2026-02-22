@@ -305,3 +305,62 @@ button:hover {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.leftHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hamburger {
+  font-size: 22px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: 0.25s ease;
+}
+
+.hamburger:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* SIDEMENU */
+#sideMenu {
+  position: fixed;
+  top: 0;
+  left: -260px;
+  width: 240px;
+  height: 100%;
+  backdrop-filter: blur(20px);
+  background: rgba(0,0,0,0.55);
+  transition: 0.35s ease;
+  z-index: 999;
+  padding: 18px;
+}
+
+#sideMenu.show {
+  left: 0;
+}
+
+.sideHeader {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+#sideCategories {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sideCat {
+  padding: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  font-size: 13px;
+}
+
+.sideCat:hover {
+  background: var(--accent);
+  color: black;
+}
