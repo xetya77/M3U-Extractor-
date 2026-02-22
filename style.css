@@ -125,7 +125,7 @@ button:hover {
 /* Categories GRID RAPI */
 #categories {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 8px;
   margin-bottom: 12px;
 }
@@ -156,27 +156,37 @@ button:hover {
 
 .channel {
   display: flex;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.05);
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.06);
   cursor: pointer;
-  transform: scale(0.95);
+  transition: 0.25s ease;
+  transform: scale(0.96);
   opacity: 0;
   animation: popIn 0.35s ease forwards;
 }
 
 .channel:hover {
   transform: scale(1);
-  box-shadow: 0 0 12px rgba(0,229,255,0.25);
+  box-shadow: 0 0 14px rgba(0,229,255,0.25);
 }
 
 .channel img {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
-  object-fit: contain;
-  background: black;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+}
+
+.channel b {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.channel small {
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 @keyframes popIn {
