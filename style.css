@@ -19,17 +19,25 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: "Montserrat", sans-serif;
-  transition: 0.3s;
+  transition: 0.4s ease;
+  overflow-x: hidden;
 }
 
-/* Background Glow */
+/* Animated Premium Blur Background */
 .bg {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at top left, #00e5ff22, transparent),
-              radial-gradient(circle at bottom right, #0077ff22, transparent);
-  filter: blur(90px);
+  background:
+    radial-gradient(circle at 20% 20%, #00e5ff22, transparent),
+    radial-gradient(circle at 80% 80%, #0077ff22, transparent);
+  filter: blur(100px);
+  animation: drift 18s ease-in-out infinite alternate;
   z-index: -1;
+}
+
+@keyframes drift {
+  from { transform: scale(1) translateY(0px); }
+  to { transform: scale(1.1) translateY(-20px); }
 }
 
 /* Header */
@@ -37,9 +45,29 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: 18px;
   max-width: 1000px;
   margin: auto;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* Layout Transition */
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 75vh;
+  transition: 0.6s ease;
+}
+
+.shifted {
+  align-items: flex-start;
+  padding-top: 10px;
 }
 
 /* Glass Card */
@@ -53,29 +81,37 @@ header {
 
 /* Container */
 .container {
-  max-width: 1000px;
-  margin: auto;
+  width: 95%;
+  max-width: 950px;
   padding: 15px;
 }
 
-/* Input & Tools */
-.inputBox, .tools {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-input {
+/* Input Wrap */
+.inputWrap {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: rgba(0,0,0,0.25);
-  color: var(--text);
-  font-size: 14px;
 }
 
+.inputWrap span {
+  opacity: 0.6;
+}
+
+input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-family: "Montserrat", sans-serif;
+}
+
+/* Buttons */
 button {
   padding: 10px 14px;
   border-radius: 12px;
@@ -83,47 +119,52 @@ button {
   background: var(--accent);
   font-weight: 600;
   cursor: pointer;
-  transition: 0.25s;
-  font-size: 13px;
+  transition: 0.25s ease;
+  font-family: "Montserrat", sans-serif;
 }
 
 button:hover {
-  transform: translateY(-1px) scale(1.03);
+  transform: translateY(-1px);
   box-shadow: 0 0 10px var(--accent);
 }
 
 /* Status */
 #status {
-  margin: 6px 0;
-  color: var(--accent);
   font-size: 13px;
+  margin: 8px 0;
+  color: var(--accent);
 }
 
-/* Categories */
+/* Categories Clean Layout */
 #categories {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 6px;
-  flex-wrap: wrap;
   margin-bottom: 10px;
 }
 
 .category {
-  padding: 5px 10px;
-  border-radius: 20px;
+  text-align: center;
+  padding: 6px;
+  border-radius: 12px;
   background: rgba(255,255,255,0.08);
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.2s ease;
   font-size: 12px;
+}
+
+.category:hover {
+  background: var(--accent);
+  color: black;
 }
 
 /* Channel List */
 #channelList {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 8px;
 }
 
-/* Intro animation */
 .channel {
   background: rgba(255,255,255,0.05);
   border-radius: 14px;
@@ -132,57 +173,17 @@ button:hover {
   gap: 8px;
   cursor: pointer;
   opacity: 0;
-  transform: translateY(10px);
-  animation: fadeInUp 0.35s ease forwards;
+  transform: translateY(8px);
+  animation: fadeUp 0.4s ease forwards;
 }
 
 .channel:hover {
   transform: translateY(-2px);
-  background: rgba(0,229,255,0.12);
   box-shadow: 0 0 12px rgba(0,229,255,0.25);
 }
 
-.channel img {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-  border-radius: 6px;
-  background: black;
-}
-
-.channel small {
-  font-size: 11px;
-  opacity: 0.6;
-}
-
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Spinner */
-#loading {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
-
-.spinner {
-  width: 55px;
-  height: 55px;
-  border: 4px solid transparent;
-  border-top: 4px solid var(--accent);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Player Modal */
@@ -194,7 +195,6 @@ button:hover {
   display: none;
   justify-content: center;
   align-items: center;
-  z-index: 999;
 }
 
 .playerBox {
@@ -203,45 +203,45 @@ button:hover {
   background: var(--glass);
   border-radius: 18px;
   padding: 10px;
-  border: 1px solid var(--border);
 }
 
-.playerBox video {
-  width: 100%;
-  border-radius: 12px;
-  background: black;
+/* Spinner */
+#loading {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.35);
 }
 
-.closeBtn {
-  float: right;
-  cursor: pointer;
-  padding: 4px 10px;
-  font-size: 14px;
-  color: var(--accent);
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid transparent;
+  border-top: 4px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-/* Marquee */
+/* Marquee refined */
 #marquee {
   position: fixed;
   bottom: 0;
   width: 100%;
-  background: rgba(0,0,0,0.4);
   backdrop-filter: blur(10px);
-  overflow: hidden;
+  background: rgba(0,0,0,0.35);
 }
 
 .marquee-content {
-  display: inline-block;
-  padding: 8px;
-  animation: scroll 18s linear infinite;
-  color: var(--accent);
-  font-size: 12px;
+  padding: 6px;
+  animation: scroll 22s linear infinite;
+  font-size: 11px;
+  opacity: 0.7;
 }
 
-/* MOBILE FIX */
+/* Mobile Polish */
 @media (max-width: 600px) {
-
-  h1 { font-size: 16px; }
 
   .inputBox, .tools {
     flex-direction: column;
