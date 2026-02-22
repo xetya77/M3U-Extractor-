@@ -2,11 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>M3U Playlist Extractor</title>
+
+  <link rel="icon" href="data:,">
 
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 
+  <!-- Streaming Engines -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/dashjs@latest/dist/dash.all.min.js"></script>
 </head>
@@ -59,7 +64,7 @@
   <div class="playerBackdrop"></div>
 
   <div class="playerBox">
-    <div class="closeBtn" onclick="closePlayer()">✕ Close</div>
+    <div class="closeBtn" id="closeBtn">✕ Close</div>
     <video id="videoPlayer" controls autoplay></video>
   </div>
 </div>
