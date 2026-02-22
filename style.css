@@ -37,7 +37,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 15px;
   max-width: 1000px;
   margin: auto;
 }
@@ -55,96 +55,111 @@ header {
 .container {
   max-width: 1000px;
   margin: auto;
-  padding: 20px;
+  padding: 15px;
 }
 
 /* Input & Tools */
 .inputBox, .tools {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,0.25);
-  color: var(--text);
-}
-
-button {
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: none;
-  background: var(--accent);
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.25s;
-}
-
-button:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 0 12px var(--accent);
-}
-
-/* Status */
-#status {
-  margin: 10px 0;
-  color: var(--accent);
-}
-
-/* Categories */
-#categories {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 10px;
 }
 
+input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+  color: var(--text);
+  font-size: 14px;
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+  font-size: 13px;
+}
+
+button:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* Status */
+#status {
+  margin: 6px 0;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+/* Categories */
+#categories {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
 .category {
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 20px;
   background: rgba(255,255,255,0.08);
   cursor: pointer;
   transition: 0.2s;
-}
-
-.category:hover {
-  background: var(--accent);
-  color: black;
+  font-size: 12px;
 }
 
 /* Channel List */
 #channelList {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
 }
 
+/* Intro animation */
 .channel {
   background: rgba(255,255,255,0.05);
   border-radius: 14px;
-  padding: 10px;
+  padding: 8px;
   display: flex;
-  gap: 10px;
-  transition: 0.25s;
+  gap: 8px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.35s ease forwards;
 }
 
 .channel:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   background: rgba(0,229,255,0.12);
-  box-shadow: 0 0 18px rgba(0,229,255,0.25);
+  box-shadow: 0 0 12px rgba(0,229,255,0.25);
 }
 
 .channel img {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 6px;
   background: black;
+}
+
+.channel small {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Spinner */
@@ -158,8 +173,8 @@ button:hover {
 }
 
 .spinner {
-  width: 60px;
-  height: 60px;
+  width: 55px;
+  height: 55px;
   border: 4px solid transparent;
   border-top: 4px solid var(--accent);
   border-radius: 50%;
@@ -168,6 +183,41 @@ button:hover {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Player Modal */
+#playerModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.playerBox {
+  width: 95%;
+  max-width: 800px;
+  background: var(--glass);
+  border-radius: 18px;
+  padding: 10px;
+  border: 1px solid var(--border);
+}
+
+.playerBox video {
+  width: 100%;
+  border-radius: 12px;
+  background: black;
+}
+
+.closeBtn {
+  float: right;
+  cursor: pointer;
+  padding: 4px 10px;
+  font-size: 14px;
+  color: var(--accent);
 }
 
 /* Marquee */
@@ -182,12 +232,26 @@ button:hover {
 
 .marquee-content {
   display: inline-block;
-  padding: 10px;
+  padding: 8px;
   animation: scroll 18s linear infinite;
   color: var(--accent);
+  font-size: 12px;
 }
 
-@keyframes scroll {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-100%); }
+/* MOBILE FIX */
+@media (max-width: 600px) {
+
+  h1 { font-size: 16px; }
+
+  .inputBox, .tools {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  #channelList {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
