@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>M3U Glass Extractor</title>
 
-  <!-- Font -->
+  <!-- Montserrat Font -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
@@ -27,26 +27,25 @@
 
   <div class="tools">
     <input id="search" placeholder="Search channel...">
-    <button onclick="copyNames()">COPY</button>
-    <button onclick="exportAllTXT()">EXPORT ALL</button>
+    <button id="copyBtn">COPY</button>
+    <button id="exportBtn">EXPORT TXT</button>
   </div>
 
   <div id="status"></div>
-
   <div id="categories"></div>
   <div id="channelList"></div>
 
 </div>
 
-<!-- Loading Spinner -->
-<div id="loading" class="hidden">
+<!-- Spinner -->
+<div id="loading">
   <div class="spinner"></div>
 </div>
 
 <!-- Marquee -->
 <div id="marquee">
   <div class="marquee-content">
-    This web tool extracts channel names, logos, and categories from M3U playlists • Built for IPTV playlist analysis • Supports TXT export & filtering • Modern glass UI
+    This tool extracts channel names, logos, and categories from M3U playlists • Glass UI • Smart filtering • TXT export
   </div>
 </div>
 
