@@ -20,16 +20,15 @@ body {
   color: var(--text);
   font-family: "Montserrat", sans-serif;
   transition: 0.3s;
-  overflow-x: hidden;
 }
 
-/* Background Blur */
+/* Background Glow */
 .bg {
   position: fixed;
   inset: 0;
   background: radial-gradient(circle at top left, #00e5ff22, transparent),
               radial-gradient(circle at bottom right, #0077ff22, transparent);
-  filter: blur(80px);
+  filter: blur(90px);
   z-index: -1;
 }
 
@@ -41,11 +40,6 @@ header {
   padding: 20px;
   max-width: 1000px;
   margin: auto;
-}
-
-h1 {
-  font-size: 22px;
-  font-weight: 600;
 }
 
 /* Glass Card */
@@ -64,12 +58,12 @@ h1 {
   padding: 20px;
 }
 
-/* Input */
+/* Input & Tools */
 .inputBox, .tools {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
   flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
 input {
@@ -88,7 +82,7 @@ button {
   background: var(--accent);
   font-weight: 600;
   cursor: pointer;
-  transition: 0.25s ease;
+  transition: 0.25s;
 }
 
 button:hover {
@@ -131,14 +125,12 @@ button:hover {
 }
 
 .channel {
-  backdrop-filter: blur(10px);
   background: rgba(255,255,255,0.05);
   border-radius: 14px;
   padding: 10px;
   display: flex;
-  align-items: center;
   gap: 10px;
-  transition: 0.25s ease;
+  transition: 0.25s;
 }
 
 .channel:hover {
@@ -159,9 +151,8 @@ button:hover {
 #loading {
   position: fixed;
   inset: 0;
-  backdrop-filter: blur(8px);
   background: rgba(0,0,0,0.35);
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
 }
@@ -178,8 +169,6 @@ button:hover {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
-.hidden { display: none; }
 
 /* Marquee */
 #marquee {
@@ -201,10 +190,4 @@ button:hover {
 @keyframes scroll {
   from { transform: translateX(100%); }
   to { transform: translateX(-100%); }
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  h1 { font-size: 18px; }
-  button { flex: 1; }
 }
