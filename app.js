@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  console.log("DOM ready");
+
   const loadBtn = document.getElementById("loadBtn");
   const statusTxt = document.getElementById("status");
   const listDiv = document.getElementById("channelList");
@@ -7,37 +9,58 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("search");
   const loading = document.getElementById("loading");
   const modeToggle = document.getElementById("modeToggle");
+  const inputUrl = document.getElementById("m3uUrl");
+
+  if (!loadBtn || !loading) {
+    console.error("Element missing");
+    return;
+  }
 
   let channels = [];
   let categories = {};
   let activeCategory = "ALL";
 
-  loadBtn.onclick = () => {
-    const url = document.getElementById("m3uUrl").value.trim();
-    if (!url) return statusTxt.innerText = "Paste playlist URL";
+  // Ensure spinner hidden at start
+  showLoading(false);
 
+  loadBtn.addEventListener("click", () => {
+
+    const url = inputUrl.value.trim();
+    if (!url) {
+      statusTxt.innerText = "Paste playlist URL";
+      return;
+    }
+
+    statusTxt.innerText = "Loading playlist...";
     showLoading(true);
 
     fetch(url)
-      .then(res => res.text())
+      .then(res => {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.text();
+      })
       .then(text => {
         parseM3U(text);
-        showLoading(false);
         statusTxt.innerText = `Loaded ${channels.length} channels`;
-      })
-      .catch(() => {
         showLoading(false);
-        statusTxt.innerText = "Failed to load playlist";
+      })
+      .catch(err => {
+        console.error(err);
+        statusTxt.innerText = "Failed to load playlist (CORS / invalid URL)";
+        showLoading(false);
       });
-  };
+
+  });
 
   function parseM3U(data) {
+
     channels = [];
     categories = {};
 
     const lines = data.split("\n");
 
     for (let i = 0; i < lines.length; i++) {
+
       if (lines[i].startsWith("#EXTINF")) {
 
         const line = lines[i];
@@ -50,11 +73,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const group = groupMatch ? groupMatch[1] : "Uncategorized";
 
         if (name) {
+
           const ch = { name, logo, group };
           channels.push(ch);
 
           if (!categories[group]) categories[group] = [];
           categories[group].push(ch);
+
         }
       }
     }
@@ -65,6 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderCategories() {
     catDiv.innerHTML = "";
+
     createCategoryButton("ALL");
 
     Object.keys(categories).forEach(cat => {
@@ -73,23 +99,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createCategoryButton(name) {
+
     const div = document.createElement("div");
     div.className = "category";
     div.innerText = name;
 
-    div.onclick = () => {
+    div.addEventListener("click", () => {
       activeCategory = name;
       const list = name === "ALL" ? channels : categories[name];
       renderChannels(list);
-    };
+    });
 
     catDiv.appendChild(div);
   }
 
   function renderChannels(list) {
+
     listDiv.innerHTML = "";
 
     list.forEach(ch => {
+
       const div = document.createElement("div");
       div.className = "channel";
 
@@ -105,26 +134,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  searchInput.oninput = () => {
+  searchInput.addEventListener("input", () => {
+
     const key = searchInput.value.toLowerCase();
 
     const baseList = activeCategory === "ALL"
       ? channels
-      : categories[activeCategory];
+      : categories[activeCategory] || [];
 
     const filtered = baseList.filter(ch =>
       ch.name.toLowerCase().includes(key)
     );
 
     renderChannels(filtered);
-  };
+  });
 
   function showLoading(show) {
     loading.classList.toggle("hidden", !show);
   }
 
-  modeToggle.onclick = () => {
+  modeToggle.addEventListener("click", () => {
     document.body.classList.toggle("light");
-  };
+  });
 
 });
