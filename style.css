@@ -22,7 +22,10 @@ body {
   background: var(--bg);
   color: var(--text);
   transition: 0.4s ease;
+
+  overflow-x: hidden;   /* ✅ FIX GLOBAL LAYAR KEPO TONG */
 }
+
 
 /* BG Blur */
 .bg {
@@ -168,20 +171,41 @@ button:hover {
   animation: popIn 0.35s ease forwards;
 }
 
-.channel:hover {
-  transform: scale(1);
-  box-shadow: 0 0 14px rgba(0,229,255,0.25);
+.channel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: 0.25s ease;
+  min-height: 74px;          /* FIX HEIGHT CONSISTENT */
+  box-sizing: border-box;
 }
 
 .channel img {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
   border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.channel div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .channel b {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .channel small {
