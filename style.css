@@ -327,14 +327,16 @@ button:hover {
 #sideMenu {
   position: fixed;
   top: 0;
-  left: -260px;
+  left: -240px;          /* FIXED */
   width: 240px;
   height: 100%;
-  backdrop-filter: blur(20px);
-  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(22px);
+  background: var(--glass);
+  border-right: 1px solid var(--border);
   transition: 0.35s ease;
   z-index: 999;
   padding: 18px;
+  box-sizing: border-box;
 }
 
 #sideMenu.show {
@@ -353,14 +355,15 @@ button:hover {
 }
 
 .sideCat {
-  padding: 8px;
-  border-radius: 12px;
+  padding: 10px;
+  border-radius: 14px;
   cursor: pointer;
   transition: 0.25s ease;
   font-size: 13px;
+  color: var(--text);              /* FIX */
 }
 
 .sideCat:hover {
   background: var(--accent);
-  color: black;
+  color: white;                    /* FIX DAY MODE */
 }
