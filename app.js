@@ -1,27 +1,42 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   const loadBtn = document.getElementById("loadBtn");
-  const copyBtn = document.getElementById("copyBtn");
-  const exportBtn = document.getElementById("exportBtn");
+  const modeToggle = document.getElementById("modeToggle");
+  const resetBtn = document.getElementById("resetBtn");
   const statusTxt = document.getElementById("status");
   const listDiv = document.getElementById("channelList");
   const catDiv = document.getElementById("categories");
+  const searchRow = document.getElementById("searchRow");
   const searchInput = document.getElementById("search");
   const loading = document.getElementById("loading");
-  const mainBox = document.getElementById("mainBox");
+  const clock = document.getElementById("clock");
 
   const modal = document.getElementById("playerModal");
   const video = document.getElementById("videoPlayer");
 
   let channels = [];
   let categories = {};
-  let currentNumberInput = "";
+  let activeList = [];
+
+  /* CLOCK realtime smooth */
+  function updateClock() {
+    const now = new Date();
+    clock.innerText = now.toLocaleTimeString();
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  /* Restore theme */
+  if (localStorage.getItem("theme") === "light") {
+    document.body.classList.add("light");
+    modeToggle.innerText = "☀️";
+  }
 
   /* Restore playlist */
   const saved = localStorage.getItem("playlistData");
   if (saved) {
     parseM3U(saved);
-    mainBox.classList.add("shifted");
+    searchRow.classList.remove("hidden");
   }
 
   function showLoading(show) {
@@ -29,17 +44,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadBtn.onclick = () => {
+
     const url = document.getElementById("m3uUrl").value.trim();
     if (!url) return;
 
     showLoading(true);
 
     fetch(url)
-      .then(res => res.text())
+      .then(r => r.text())
       .then(text => {
         localStorage.setItem("playlistData", text);
         parseM3U(text);
-        mainBox.classList.add("shifted");
+        searchRow.classList.remove("hidden");
         showLoading(false);
       })
       .catch(() => showLoading(false));
@@ -58,19 +74,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const line = lines[i];
         const name = line.split(",")[1]?.trim();
-
-        const logoMatch = line.match(/tvg-logo="(.*?)"/);
-        const groupMatch = line.match(/group-title="(.*?)"/);
-
-        const logo = logoMatch ? logoMatch[1] : "";
-        const group = groupMatch ? groupMatch[1] : "Other";
+        const logo = line.match(/tvg-logo="(.*?)"/)?.[1] || "";
+        const group = line.match(/group-title="(.*?)"/)?.[1] || "Other";
         const streamUrl = lines[i + 1]?.trim();
 
         if (name && streamUrl) {
 
           const number = channels.length + 1;
-
           const ch = { number, name, logo, group, streamUrl };
+
           channels.push(ch);
 
           if (!categories[group]) categories[group] = [];
@@ -79,17 +91,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    activeList = channels;
     renderCategories();
-    renderChannels(channels);
+    renderChannels(activeList);
   }
 
   function renderCategories() {
     catDiv.innerHTML = "";
-    Object.keys(categories).forEach(cat => {
+
+    Object.keys(categories).forEach((cat, i) => {
+
       const div = document.createElement("div");
       div.className = "category";
       div.innerText = cat;
-      div.onclick = () => renderChannels(categories[cat]);
+      div.style.animationDelay = `${i * 0.03}s`;
+
+      div.onclick = () => {
+        activeList = categories[cat];
+        renderChannels(activeList);
+      };
+
       catDiv.appendChild(div);
     });
   }
@@ -112,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       div.onclick = () => playStream(ch.streamUrl);
+
       listDiv.appendChild(div);
     });
   }
@@ -122,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (url.endsWith(".m3u8")) {
 
-      if (window.Hls && Hls.isSupported()) {
+      if (Hls.isSupported()) {
         const hls = new Hls();
         hls.loadSource(url);
         hls.attachMedia(video);
@@ -132,8 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } else if (url.endsWith(".mpd")) {
 
-      const player = dashjs.MediaPlayer().create();
-      player.initialize(video, url, true);
+      dashjs.MediaPlayer().create().initialize(video, url, true);
 
     } else {
       video.src = url;
@@ -147,42 +168,30 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       video.pause();
       video.src = "";
-    }, 300);
+    }, 350);
   };
 
-  /* Remote / keyboard number zap */
-  document.addEventListener("keydown", (e) => {
+  /* THEME FIX */
+  modeToggle.onclick = () => {
 
-    if (e.key >= "0" && e.key <= "9") {
-      currentNumberInput += e.key;
-      statusTxt.innerText = "Channel: " + currentNumberInput;
+    document.body.classList.toggle("light");
 
-      setTimeout(() => {
-        const num = parseInt(currentNumberInput);
-        const found = channels.find(c => c.number === num);
-        if (found) playStream(found.streamUrl);
+    const isLight = document.body.classList.contains("light");
 
-        currentNumberInput = "";
-        statusTxt.innerText = "";
-      }, 800);
-    }
-
-  });
-
-  copyBtn.onclick = () =>
-    navigator.clipboard.writeText(channels.map(c => c.name).join("\n"));
-
-  exportBtn.onclick = () => {
-    const blob = new Blob([channels.map(c => c.name).join("\n")]);
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "channels.txt";
-    a.click();
+    modeToggle.innerText = isLight ? "☀️" : "🌙";
+    localStorage.setItem("theme", isLight ? "light" : "dark");
   };
 
+  /* RESET */
+  resetBtn.onclick = () => {
+    localStorage.clear();
+    location.reload();
+  };
+
+  /* SEARCH only activeList */
   searchInput.oninput = () => {
     const key = searchInput.value.toLowerCase();
-    renderChannels(channels.filter(c => c.name.toLowerCase().includes(key)));
+    renderChannels(activeList.filter(c => c.name.toLowerCase().includes(key)));
   };
 
 });
