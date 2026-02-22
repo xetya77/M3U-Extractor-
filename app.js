@@ -1,3 +1,8 @@
+const setupDiv = document.getElementById("setup");
+const appDiv = document.getElementById("app");
+const loadBtn = document.getElementById("loadBtn");
+const statusTxt = document.getElementById("status");
+
 const video = document.getElementById("video");
 const listDiv = document.getElementById("channelList");
 const nameDiv = document.getElementById("channelName");
@@ -6,36 +11,55 @@ let channels = [];
 let currentIndex = 0;
 let hls;
 
-// AUTO LOAD PLAYLIST
-window.onload = () => {
-  const saved = localStorage.getItem("playlist");
-  const last = localStorage.getItem("lastChannel");
+// INIT
+window.addEventListener("load", () => {
+  console.log("App started");
 
-  if (saved) {
+  const savedPlaylist = localStorage.getItem("playlist");
+  const lastChannel = localStorage.getItem("lastChannel");
+
+  if (savedPlaylist) {
     showApp();
-    parseM3U(saved);
+    parseM3U(savedPlaylist);
 
-    if (last) playChannel(parseInt(last));
+    if (lastChannel) {
+      playChannel(parseInt(lastChannel));
+    }
   }
-};
+});
 
-function showApp() {
-  document.getElementById("setup").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-}
+// BUTTON CLICK
+loadBtn.addEventListener("click", () => {
+  const url = document.getElementById("playlistUrl").value.trim();
 
-// LOAD PLAYLIST
-function loadPlaylist() {
-  const url = document.getElementById("playlistUrl").value;
+  if (!url) {
+    statusTxt.innerText = "Isi URL dulu";
+    return;
+  }
+
+  statusTxt.innerText = "Loading playlist...";
 
   fetch(url)
-    .then(res => res.text())
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.text();
+    })
     .then(text => {
       localStorage.setItem("playlist", text);
       showApp();
       parseM3U(text);
+      statusTxt.innerText = "";
     })
-    .catch(() => alert("Playlist gagal dimuat"));
+    .catch(err => {
+      console.error(err);
+      statusTxt.innerText = "Gagal load playlist (CORS / URL)";
+    });
+});
+
+// SHOW PLAYER
+function showApp() {
+  setupDiv.classList.add("hidden");
+  appDiv.classList.remove("hidden");
 }
 
 // PARSE M3U
@@ -45,17 +69,22 @@ function parseM3U(data) {
 
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].startsWith("#EXTINF")) {
-      const name = lines[i].split(",")[1];
+      const name = lines[i].split(",")[1]?.trim();
       const url = lines[i + 1]?.trim();
-      if (url) channels.push({ name, url });
+
+      if (name && url && url.startsWith("http")) {
+        channels.push({ name, url });
+      }
     }
   }
+
+  console.log("Channels:", channels.length);
 
   renderChannels();
   playChannel(0);
 }
 
-// RENDER LIST
+// RENDER CHANNELS
 function renderChannels() {
   listDiv.innerHTML = "";
 
@@ -70,6 +99,8 @@ function renderChannels() {
 
 // PLAY CHANNEL
 function playChannel(index) {
+  if (!channels[index]) return;
+
   currentIndex = index;
   localStorage.setItem("lastChannel", index);
 
@@ -81,7 +112,7 @@ function playChannel(index) {
 
   if (hls) hls.destroy();
 
-  if (Hls.isSupported()) {
+  if (window.Hls && Hls.isSupported()) {
     hls = new Hls();
     hls.loadSource(src);
     hls.attachMedia(video);
@@ -90,16 +121,14 @@ function playChannel(index) {
   }
 }
 
-// REMOTE / KEYBOARD CONTROL
+// REMOTE / KEYBOARD
 document.addEventListener("keydown", (e) => {
 
-  // ANGKA → ZAP CHANNEL
   if (e.key >= "1" && e.key <= "9") {
     const num = parseInt(e.key) - 1;
-    if (channels[num]) playChannel(num);
+    playChannel(num);
   }
 
-  // ARROW UP/DOWN
   if (e.key === "ArrowUp") {
     if (currentIndex > 0) playChannel(currentIndex - 1);
   }
