@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadBtn = document.getElementById("loadBtn");
   const modeToggle = document.getElementById("modeToggle");
   const resetBtn = document.getElementById("resetBtn");
+  const exportBtn = document.getElementById("exportBtn");
+  const copyBtn = document.getElementById("copyBtn");
+
   const statusTxt = document.getElementById("status");
   const listDiv = document.getElementById("channelList");
   const catDiv = document.getElementById("categories");
@@ -18,26 +21,27 @@ document.addEventListener("DOMContentLoaded", () => {
   let categories = {};
   let activeList = [];
 
-  /* CLOCK realtime smooth */
+  /* ================= CLOCK 24 JAM ================= */
   function updateClock() {
-  const now = new Date();
+    const now = new Date();
 
-  const h = String(now.getHours()).padStart(2, "0");
-  const m = String(now.getMinutes()).padStart(2, "0");
-  const s = String(now.getSeconds()).padStart(2, "0");
+    const h = String(now.getHours()).padStart(2, "0");
+    const m = String(now.getMinutes()).padStart(2, "0");
+    const s = String(now.getSeconds()).padStart(2, "0");
 
-  clock.innerText = `${h}:${m}:${s}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
+    clock.innerText = `${h}:${m}:${s}`;
+  }
 
-  /* Restore theme */
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  /* ================= RESTORE THEME ================= */
   if (localStorage.getItem("theme") === "light") {
     document.body.classList.add("light");
     modeToggle.innerText = "☀️";
   }
 
-  /* Restore playlist */
+  /* ================= RESTORE PLAYLIST ================= */
   const saved = localStorage.getItem("playlistData");
   if (saved) {
     parseM3U(saved);
@@ -48,11 +52,13 @@ updateClock();
     loading.style.display = show ? "flex" : "none";
   }
 
+  /* ================= LOAD PLAYLIST ================= */
   loadBtn.onclick = () => {
 
     const url = document.getElementById("m3uUrl").value.trim();
     if (!url) return;
 
+    statusTxt.innerText = "Loading playlist...";
     showLoading(true);
 
     fetch(url)
@@ -61,11 +67,17 @@ updateClock();
         localStorage.setItem("playlistData", text);
         parseM3U(text);
         searchRow.classList.remove("hidden");
+
+        statusTxt.innerText = `Loaded ${channels.length} channels`;
         showLoading(false);
       })
-      .catch(() => showLoading(false));
+      .catch(() => {
+        statusTxt.innerText = "Failed to load playlist";
+        showLoading(false);
+      });
   };
 
+  /* ================= PARSE M3U ================= */
   function parseM3U(data) {
 
     channels = [];
@@ -97,10 +109,12 @@ updateClock();
     }
 
     activeList = channels;
+
     renderCategories();
     renderChannels(activeList);
   }
 
+  /* ================= RENDER CATEGORIES ================= */
   function renderCategories() {
     catDiv.innerHTML = "";
 
@@ -120,7 +134,9 @@ updateClock();
     });
   }
 
+  /* ================= RENDER CHANNELS ================= */
   function renderChannels(list) {
+
     listDiv.innerHTML = "";
 
     list.forEach((ch, i) => {
@@ -143,13 +159,15 @@ updateClock();
     });
   }
 
+  /* ================= PLAYER ================= */
   function playStream(url) {
 
+    modal.classList.remove("closing");
     modal.classList.add("show");
 
     if (url.endsWith(".m3u8")) {
 
-      if (Hls.isSupported()) {
+      if (window.Hls && Hls.isSupported()) {
         const hls = new Hls();
         hls.loadSource(url);
         hls.attachMedia(video);
@@ -166,17 +184,19 @@ updateClock();
     }
   }
 
+  /* ================= CLOSE PLAYER PREMIUM ================= */
   window.closePlayer = () => {
 
-    modal.classList.remove("show");
+    modal.classList.add("closing");
 
     setTimeout(() => {
+      modal.classList.remove("show", "closing");
       video.pause();
       video.src = "";
     }, 350);
   };
 
-  /* THEME FIX */
+  /* ================= THEME TOGGLE ================= */
   modeToggle.onclick = () => {
 
     document.body.classList.toggle("light");
@@ -187,16 +207,41 @@ updateClock();
     localStorage.setItem("theme", isLight ? "light" : "dark");
   };
 
-  /* RESET */
+  /* ================= RESET ================= */
   resetBtn.onclick = () => {
     localStorage.clear();
     location.reload();
   };
 
-  /* SEARCH only activeList */
+  /* ================= EXPORT TXT FIX ================= */
+  exportBtn.onclick = () => {
+
+    if (!channels.length) return;
+
+    const blob = new Blob(
+      [channels.map(c => c.name).join("\n")],
+      { type: "text/plain" }
+    );
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "all_channels.txt";
+    a.click();
+  };
+
+  /* ================= COPY ================= */
+  copyBtn.onclick = () => {
+    if (!channels.length) return;
+    navigator.clipboard.writeText(channels.map(c => c.name).join("\n"));
+    statusTxt.innerText = "Copied ✔";
+  };
+
+  /* ================= SEARCH ================= */
   searchInput.oninput = () => {
     const key = searchInput.value.toLowerCase();
-    renderChannels(activeList.filter(c => c.name.toLowerCase().includes(key)));
+    renderChannels(
+      activeList.filter(c => c.name.toLowerCase().includes(key))
+    );
   };
 
 });
