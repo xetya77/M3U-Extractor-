@@ -2,24 +2,26 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>My IPTV</title>
+  <title>M3U Channel Extractor</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
 
-<div id="setup">
-  <div class="card">
-    <h2>Add Playlist</h2>
-    <input id="playlistUrl" type="text" placeholder="https://example.com/playlist.m3u">
-    <button id="loadBtn">LOAD</button>
-    <p id="status"></p>
-  </div>
-</div>
+<div class="container">
+  <h1>M3U Channel Extractor</h1>
 
-<div id="app" class="hidden">
-  <video id="video" controls autoplay></video>
-  <div id="channelName"></div>
+  <div class="inputBox">
+    <input id="m3uUrl" placeholder="Paste URL playlist.m3u">
+    <button id="loadBtn">LOAD</button>
+  </div>
+
+  <div class="tools">
+    <input id="search" placeholder="Search channel...">
+    <button onclick="copyNames()">COPY ALL</button>
+    <button onclick="exportTXT()">EXPORT TXT</button>
+  </div>
+
+  <div id="status"></div>
   <div id="channelList"></div>
 </div>
 
