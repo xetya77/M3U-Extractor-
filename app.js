@@ -1,31 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  console.log("DOM ready");
-
   const loadBtn = document.getElementById("loadBtn");
+  const copyBtn = document.getElementById("copyBtn");
+  const exportBtn = document.getElementById("exportBtn");
   const statusTxt = document.getElementById("status");
   const listDiv = document.getElementById("channelList");
   const catDiv = document.getElementById("categories");
   const searchInput = document.getElementById("search");
   const loading = document.getElementById("loading");
   const modeToggle = document.getElementById("modeToggle");
-  const inputUrl = document.getElementById("m3uUrl");
-
-  if (!loadBtn || !loading) {
-    console.error("Element missing");
-    return;
-  }
 
   let channels = [];
   let categories = {};
   let activeCategory = "ALL";
 
-  // Ensure spinner hidden at start
-  showLoading(false);
+  showLoading(false); // HARD FIX spinner
 
   loadBtn.addEventListener("click", () => {
 
-    const url = inputUrl.value.trim();
+    const url = document.getElementById("m3uUrl").value.trim();
     if (!url) {
       statusTxt.innerText = "Paste playlist URL";
       return;
@@ -46,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(err => {
         console.error(err);
-        statusTxt.innerText = "Failed to load playlist (CORS / invalid URL)";
+        statusTxt.innerText = "Failed to load playlist";
         showLoading(false);
       });
 
@@ -106,8 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     div.addEventListener("click", () => {
       activeCategory = name;
-      const list = name === "ALL" ? channels : categories[name];
-      renderChannels(list);
+      renderChannels(name === "ALL" ? channels : categories[name]);
     });
 
     catDiv.appendChild(div);
@@ -149,8 +141,25 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChannels(filtered);
   });
 
+  copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(channels.map(c => c.name).join("\n"));
+    statusTxt.innerText = "Copied ✔";
+  });
+
+  exportBtn.addEventListener("click", () => {
+    downloadTXT("channels.txt", channels.map(c => c.name));
+  });
+
+  function downloadTXT(filename, data) {
+    const blob = new Blob([data.join("\n")], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+  }
+
   function showLoading(show) {
-    loading.classList.toggle("hidden", !show);
+    loading.style.display = show ? "flex" : "none";
   }
 
   modeToggle.addEventListener("click", () => {
