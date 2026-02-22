@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Simple IPTV</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+
+<div id="player-screen">
+  <video id="video" autoplay controls></video>
+</div>
+
+<div id="ui">
+  <input id="playlistUrl" placeholder="Paste M3U URL">
+  <button id="loadBtn">Load</button>
+  <div id="channelList"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
