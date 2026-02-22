@@ -1,19 +1,30 @@
-const video = document.getElementById('video');
-const listDiv = document.getElementById('channelList');
+const video = document.getElementById("video");
+const listDiv = document.getElementById("channelList");
+const nameDiv = document.getElementById("channelName");
 
 let channels = [];
 let currentIndex = 0;
+let hls;
 
-// Auto load playlist kalau ada
+// AUTO LOAD PLAYLIST
 window.onload = () => {
   const saved = localStorage.getItem("playlist");
+  const last = localStorage.getItem("lastChannel");
+
   if (saved) {
-    document.getElementById("setup").classList.add("hidden");
-    document.getElementById("playerUI").classList.remove("hidden");
+    showApp();
     parseM3U(saved);
+
+    if (last) playChannel(parseInt(last));
   }
 };
 
+function showApp() {
+  document.getElementById("setup").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+}
+
+// LOAD PLAYLIST
 function loadPlaylist() {
   const url = document.getElementById("playlistUrl").value;
 
@@ -21,12 +32,13 @@ function loadPlaylist() {
     .then(res => res.text())
     .then(text => {
       localStorage.setItem("playlist", text);
-      document.getElementById("setup").classList.add("hidden");
-      document.getElementById("playerUI").classList.remove("hidden");
+      showApp();
       parseM3U(text);
-    });
+    })
+    .catch(() => alert("Playlist gagal dimuat"));
 }
 
+// PARSE M3U
 function parseM3U(data) {
   channels = [];
   const lines = data.split("\n");
@@ -43,6 +55,7 @@ function parseM3U(data) {
   playChannel(0);
 }
 
+// RENDER LIST
 function renderChannels() {
   listDiv.innerHTML = "";
 
@@ -55,16 +68,21 @@ function renderChannels() {
   });
 }
 
+// PLAY CHANNEL
 function playChannel(index) {
   currentIndex = index;
+  localStorage.setItem("lastChannel", index);
 
   document.querySelectorAll(".channel").forEach(el => el.classList.remove("active"));
   document.querySelectorAll(".channel")[index]?.classList.add("active");
 
   const src = channels[index].url;
+  nameDiv.innerText = channels[index].name;
+
+  if (hls) hls.destroy();
 
   if (Hls.isSupported()) {
-    const hls = new Hls();
+    hls = new Hls();
     hls.loadSource(src);
     hls.attachMedia(video);
   } else {
@@ -72,10 +90,22 @@ function playChannel(index) {
   }
 }
 
-// Remote angka support
+// REMOTE / KEYBOARD CONTROL
 document.addEventListener("keydown", (e) => {
+
+  // ANGKA → ZAP CHANNEL
   if (e.key >= "1" && e.key <= "9") {
     const num = parseInt(e.key) - 1;
     if (channels[num]) playChannel(num);
   }
+
+  // ARROW UP/DOWN
+  if (e.key === "ArrowUp") {
+    if (currentIndex > 0) playChannel(currentIndex - 1);
+  }
+
+  if (e.key === "ArrowDown") {
+    if (currentIndex < channels.length - 1) playChannel(currentIndex + 1);
+  }
+
 });
