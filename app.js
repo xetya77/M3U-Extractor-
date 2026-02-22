@@ -7,9 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyBtn = document.getElementById("copyBtn");
   const closeBtn = document.getElementById("closeBtn");
 
+  const hamburger = document.getElementById("hamburger");
+  const sideMenu = document.getElementById("sideMenu");
+  const sideCategories = document.getElementById("sideCategories");
+
   const statusTxt = document.getElementById("status");
   const listDiv = document.getElementById("channelList");
-  const catDiv = document.getElementById("categories");
   const searchRow = document.getElementById("searchRow");
   const searchInput = document.getElementById("search");
   const loading = document.getElementById("loading");
@@ -21,7 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let channels = [];
   let categories = {};
   let activeList = [];
-  let currentChannelIndex = null;
+  let numberBuffer = "";
+  let numberTimeout;
 
   /* ================= CLOCK 24 JAM ================= */
   function updateClock() {
@@ -37,44 +41,54 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ================= RESTORE THEME ================= */
   if (localStorage.getItem("theme") === "light") {
     document.body.classList.add("light");
-    modeToggle.innerText = "☀️";
+    if (modeToggle) modeToggle.innerText = "☀️";
   }
 
   /* ================= RESTORE PLAYLIST ================= */
   const saved = localStorage.getItem("playlistData");
   if (saved) {
     parseM3U(saved);
-    searchRow.classList.remove("hidden");
+    if (searchRow) searchRow.classList.remove("hidden");
   }
 
   function showLoading(show) {
     loading.style.display = show ? "flex" : "none";
   }
 
+  /* ================= HAMBURGER MENU ================= */
+  if (hamburger && sideMenu) {
+    hamburger.onclick = () => {
+      sideMenu.classList.toggle("show");
+    };
+  }
+
   /* ================= LOAD PLAYLIST ================= */
-  loadBtn.onclick = () => {
+  if (loadBtn) {
+    loadBtn.onclick = () => {
 
-    const url = document.getElementById("m3uUrl").value.trim();
-    if (!url) return;
+      const url = document.getElementById("m3uUrl").value.trim();
+      if (!url) return;
 
-    statusTxt.innerText = "Loading playlist...";
-    showLoading(true);
+      statusTxt.innerText = "Loading playlist...";
+      showLoading(true);
 
-    fetch(url)
-      .then(r => r.text())
-      .then(text => {
-        localStorage.setItem("playlistData", text);
-        parseM3U(text);
-        searchRow.classList.remove("hidden");
+      fetch(url)
+        .then(r => r.text())
+        .then(text => {
+          localStorage.setItem("playlistData", text);
+          parseM3U(text);
 
-        statusTxt.innerText = `Loaded ${channels.length} channels`;
-        showLoading(false);
-      })
-      .catch(() => {
-        statusTxt.innerText = "Failed to load playlist";
-        showLoading(false);
-      });
-  };
+          if (searchRow) searchRow.classList.remove("hidden");
+
+          statusTxt.innerText = `Loaded ${channels.length} channels`;
+          showLoading(false);
+        })
+        .catch(() => {
+          statusTxt.innerText = "Failed to load playlist";
+          showLoading(false);
+        });
+    };
+  }
 
   /* ================= PARSE M3U ================= */
   function parseM3U(data) {
@@ -113,27 +127,33 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChannels(activeList);
   }
 
-  /* ================= RENDER CATEGORIES ================= */
+  /* ================= RENDER CATEGORIES → SIDEBAR ================= */
   function renderCategories() {
-    catDiv.innerHTML = "";
 
-    Object.keys(categories).forEach((cat, i) => {
+    if (!sideCategories) return;
+
+    sideCategories.innerHTML = "";
+
+    Object.keys(categories).forEach(cat => {
 
       const div = document.createElement("div");
-      div.className = "category";
+      div.className = "sideCat";
       div.innerText = cat;
 
       div.onclick = () => {
         activeList = categories[cat];
         renderChannels(activeList);
+        sideMenu.classList.remove("show");
       };
 
-      catDiv.appendChild(div);
+      sideCategories.appendChild(div);
     });
   }
 
   /* ================= RENDER CHANNELS ================= */
   function renderChannels(list) {
+
+    if (!listDiv) return;
 
     listDiv.innerHTML = "";
 
@@ -151,16 +171,14 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      div.onclick = () => playStream(ch, i);
+      div.onclick = () => playStream(ch);
 
       listDiv.appendChild(div);
     });
   }
 
   /* ================= PLAYER ================= */
-  function playStream(channelObj, index) {
-
-    currentChannelIndex = index;
+  function playStream(channelObj) {
 
     modal.classList.remove("closing");
     modal.classList.add("show");
@@ -184,6 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       video.src = url;
     }
+
+    statusTxt.innerText = `${channelObj.number}. ${channelObj.name}`;
   }
 
   /* ================= CLOSE PLAYER ================= */
@@ -195,67 +215,73 @@ document.addEventListener("DOMContentLoaded", () => {
       modal.classList.remove("show", "closing");
       video.pause();
       video.src = "";
-      currentChannelIndex = null;
+      statusTxt.innerText = "";
     }, 350);
   }
 
   if (closeBtn) closeBtn.onclick = closePlayer;
 
   /* ================= THEME TOGGLE ================= */
-  modeToggle.onclick = () => {
+  if (modeToggle) {
+    modeToggle.onclick = () => {
 
-    document.body.classList.toggle("light");
+      document.body.classList.toggle("light");
 
-    const isLight = document.body.classList.contains("light");
+      const isLight = document.body.classList.contains("light");
 
-    modeToggle.innerText = isLight ? "☀️" : "🌙";
-    localStorage.setItem("theme", isLight ? "light" : "dark");
-  };
+      modeToggle.innerText = isLight ? "☀️" : "🌙";
+      localStorage.setItem("theme", isLight ? "light" : "dark");
+    };
+  }
 
   /* ================= RESET ================= */
-  resetBtn.onclick = () => {
-    localStorage.clear();
-    location.reload();
-  };
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      localStorage.clear();
+      location.reload();
+    };
+  }
 
   /* ================= EXPORT TXT ================= */
-  exportBtn.onclick = () => {
+  if (exportBtn) {
+    exportBtn.onclick = () => {
 
-    if (!channels.length) return;
+      if (!channels.length) return;
 
-    const blob = new Blob(
-      [channels.map(c => c.name).join("\n")],
-      { type: "text/plain" }
-    );
+      const blob = new Blob(
+        [channels.map(c => c.name).join("\n")],
+        { type: "text/plain" }
+      );
 
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "all_channels.txt";
-    a.click();
-  };
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "all_channels.txt";
+      a.click();
+    };
+  }
 
   /* ================= COPY ================= */
-  copyBtn.onclick = () => {
-    if (!channels.length) return;
-    navigator.clipboard.writeText(channels.map(c => c.name).join("\n"));
-    statusTxt.innerText = "Copied ✔";
-  };
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      if (!channels.length) return;
+      navigator.clipboard.writeText(channels.map(c => c.name).join("\n"));
+      statusTxt.innerText = "Copied ✔";
+    };
+  }
 
   /* ================= SEARCH ================= */
-  searchInput.oninput = () => {
-    const key = searchInput.value.toLowerCase();
-    renderChannels(
-      activeList.filter(c => c.name.toLowerCase().includes(key))
-    );
-  };
+  if (searchInput) {
+    searchInput.oninput = () => {
+      const key = searchInput.value.toLowerCase();
+      renderChannels(
+        activeList.filter(c => c.name.toLowerCase().includes(key))
+      );
+    };
+  }
 
   /* =====================================================
-     🔥 REMOTE / KEYBOARD NUMBER CHANNEL SWITCH
+     🔥 REMOTE / KEYBOARD ANGKA → SWITCH CHANNEL
      ===================================================== */
-
-  let numberBuffer = "";
-  let numberTimeout;
-
   document.addEventListener("keydown", (e) => {
 
     if (e.key >= "0" && e.key <= "9") {
@@ -267,18 +293,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       numberTimeout = setTimeout(() => {
 
-        const channelNumber = parseInt(numberBuffer);
+        const num = parseInt(numberBuffer);
 
-        const found = channels.find(c => c.number === channelNumber);
+        const found = channels.find(c => c.number === num);
 
         if (found) {
-          playStream(found, found.number - 1);
+          playStream(found);
         }
 
         numberBuffer = "";
         statusTxt.innerText = "";
 
-      }, 700); // delay natural IPTV zap
+      }, 700);
     }
 
   });
