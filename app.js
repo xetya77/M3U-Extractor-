@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sideMenu = document.getElementById("sideMenu");
   const sideCategories = document.getElementById("sideCategories");
 
+  const closeSide = document.getElementById("closeSide");
   const statusTxt = document.getElementById("status");
   const listDiv = document.getElementById("channelList");
   const searchRow = document.getElementById("searchRow");
@@ -27,6 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let numberBuffer = "";
   let numberTimeout;
 
+if (closeSide) {
+  closeSide.onclick = () => {
+    sideMenu.classList.remove("show");
+  };
+}
+  
   /* ================= CLOCK 24 JAM ================= */
   function updateClock() {
     const now = new Date();
